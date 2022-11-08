@@ -46,14 +46,14 @@ You can install the current version of `RegressionCalibration` with:
 ```{r install-package, echo=TRUE, eval=F, message=FALSE, results='hide'}
 # Directly install the package from github
 # install.packages("remotes")
-remotes::install_github("n-mounier/RegressionCalibration", )
+remotes::install_github("n-mounier/RegressionCalibration")
 library(RegressionCalibration)
 ```
 <!--- Note: using remotes instead of devtools leads to re-build the package
 and apparently, it may be a problem with R 3.4 and macOS, 
 see https://stackoverflow.com/questions/43595457/alternate-compiler-for-installing-r-packages-clang-error-unsupported-option/43943631#43943631 --->
 
-## Usage
+## Usage - Main Function
 [//]:*******
 
 The `RegressionCalibration` R-Package has been designed to be compatible with the `TwoSampleMR` R-Package: you can use it to extract data and pre-process the data.   
@@ -113,6 +113,47 @@ resRC %>% filter(method=="Inverse variance weighted")
 ``` 
 
 As the causal effect of BMI on itself is expected to be 1, we can see that the standard IVW estimate (regardless of the outcome used) is biased towards the null. The IVW using Regression Calibration approach recovers the correct value.
+
+## Usage - Other Functions
+
+Other functions (method-specific) are also available. As they require a different type of input (vectors of genetic effects and standard errors) they should be use with care.
+
+```{r otherFunctions, eval=T}
+dat_disc = dat %>%
+  filter(sample=="replication") %>%
+  transmute(SNP,
+            EA = effect_allele.exposure,
+            OA = other_allele.exposure,
+            beta = beta.exposure,
+            se = se.exposure)
+dat_rep = dat %>%
+  filter(sample=="replication") %>%
+  transmute(SNP,
+            EA = effect_allele.outcome,
+            OA = other_allele.outcome,
+            beta = beta.outcome,
+            se = se.outcome)
+dat_out = dat %>%
+  filter(sample=="outcome") %>%
+  transmute(SNP,
+            EA = effect_allele.outcome,
+            OA = other_allele.outcome,
+            beta = beta.outcome,
+            se = se.outcome)
+# check that for each sample-specific data we have the same SNPs in the same order
+table(dat_disc$OA == dat_rep$OA)
+table(dat_disc$EA == dat_rep$EA)
+table(dat_disc$SNP == dat_out$SNP)
+table(dat_disc$OA == dat_out$OA)
+table(dat_disc$EA == dat_out$EA)
+
+RegressionCalibration::RC_ivw(b_disc = dat_disc$beta,
+                              b_rep = dat_rep$beta,
+                              b_out = dat_out$beta,
+                              se_disc = dat_disc$se,
+                              se_rep = dat_rep$se,
+                              se_out = dat_out$se)
+``` 
 
 ## Citation
 [//]:*******

@@ -7,10 +7,12 @@ development.
 ## Overview
 
 `RegressionCalibration` is an R-package to perform three-sample
-Mendelian Randomisation (MR) analyses using the regression calibration
+Mendelian Randomisation (MR) analyses using the Regression Calibration
 framework. MR estimates can be subject to bias due the use of weak
 instruments and winner’s curse. The regression calibration framework can
-be used to obtain…  
+be used when three samples (discovery and replication for the exposure,
+and outcome) to account for these biases and re-calibrate the causal
+effect estimate.  
 This package builds up on the
 [`TwoSampleMR`](https://github.com/MRCIEU/TwoSampleMR/) R-package for
 the implementation of the most common MR estimators. We also recommend
@@ -39,7 +41,7 @@ You can install the current version of `RegressionCalibration` with:
 ``` r
 # Directly install the package from github
 # install.packages("remotes")
-remotes::install_github("n-mounier/RegressionCalibration", )
+remotes::install_github("n-mounier/RegressionCalibration")
 library(RegressionCalibration)
 ```
 
@@ -47,7 +49,7 @@ library(RegressionCalibration)
 and apparently, it may be a problem with R 3.4 and macOS, 
 see https://stackoverflow.com/questions/43595457/alternate-compiler-for-installing-r-packages-clang-error-unsupported-option/43943631#43943631 --->
 
-## Usage
+## Usage - Main Function
 
 The `RegressionCalibration` R-Package has been designed to be compatible
 with the `TwoSampleMR` R-Package: you can use it to extract data and
@@ -129,16 +131,16 @@ resRC
     ## 5 Body mass index (BMI) || id:ukb-a-248 Body mass index || id:ieu-a-974
     ##                           outcome                    method nsnps          pval
     ## 1 Body mass index || id:ieu-a-974 Inverse variance weighted   239 9.385406e-201
-    ## 2 Body mass index || id:ieu-a-974             Simple median   239 7.479421e-122
-    ## 3 Body mass index || id:ieu-a-974           Weighted median   239 1.564655e-134
-    ## 4 Body mass index || id:ieu-a-974               Simple mode   239  1.753582e-09
-    ## 5 Body mass index || id:ieu-a-974             Weighted mode   239  5.410506e-58
+    ## 2 Body mass index || id:ieu-a-974             Simple median   239 3.339987e-111
+    ## 3 Body mass index || id:ieu-a-974           Weighted median   239 5.011951e-130
+    ## 4 Body mass index || id:ieu-a-974               Simple mode   239  1.630656e-08
+    ## 5 Body mass index || id:ieu-a-974             Weighted mode   239  3.514769e-52
     ##          b         se
     ## 1 1.045197 0.03457412
-    ## 2 1.046779 0.04459268
-    ## 3 1.053022 0.04265904
-    ## 4 1.086436 0.18049721
-    ## 5 1.055437 0.06574535
+    ## 2 1.046779 0.04671594
+    ## 3 1.053022 0.04340317
+    ## 4 1.086436 0.19238431
+    ## 5 1.055437 0.06943484
 
 The output of the `RegressionCalibration::RC` is similar to the one of
 `TwoSampleMR::mr()`.  
@@ -200,8 +202,8 @@ resMR_fullGIANT %>% filter(method=="Inverse variance weighted")
     ## 1   ukb-a-248    ieu-a-2 Body mass index || id:ieu-a-2
     ##                                exposure                    method nsnp
     ## 1 Body mass index (BMI) || id:ukb-a-248 Inverse variance weighted  240
-    ##           b         se          pval
-    ## 1 0.7686666 0.02276704 7.068113e-250
+    ##           b        se          pval
+    ## 1 0.7650597 0.0231447 1.296585e-239
 
 ``` r
 resRC %>% filter(method=="Inverse variance weighted")
@@ -219,10 +221,96 @@ that the standard IVW estimate (regardless of the outcome used) is
 biased towards the null. The IVW using Regression Calibration approach
 recovers the correct value.
 
-## Citation
+## Usage - Other Functions
 
-<!--- If you use the `MRlap` package, please cite:
-[Ninon Mounier, Zoltán Kutalik, bGWAS: an R package to perform Bayesian Genome Wide Association Studies, Bioinformatics](https://doi.org/10.1093/bioinformatics/btaa549) --->
+Other functions (method-specific) are also available. As they require a
+different type of input (vectors of genetic effects and standard errors)
+they should be use with care.
+
+``` r
+dat_disc = dat %>%
+  filter(sample=="replication") %>%
+  transmute(SNP,
+            EA = effect_allele.exposure,
+            OA = other_allele.exposure,
+            beta = beta.exposure,
+            se = se.exposure)
+dat_rep = dat %>%
+  filter(sample=="replication") %>%
+  transmute(SNP,
+            EA = effect_allele.outcome,
+            OA = other_allele.outcome,
+            beta = beta.outcome,
+            se = se.outcome)
+dat_out = dat %>%
+  filter(sample=="outcome") %>%
+  transmute(SNP,
+            EA = effect_allele.outcome,
+            OA = other_allele.outcome,
+            beta = beta.outcome,
+            se = se.outcome)
+# check that for each sample-specific data we have the same SNPs in the same order
+table(dat_disc$OA == dat_rep$OA)
+```
+
+    ## 
+    ## TRUE 
+    ##  247
+
+``` r
+table(dat_disc$EA == dat_rep$EA)
+```
+
+    ## 
+    ## TRUE 
+    ##  247
+
+``` r
+table(dat_disc$SNP == dat_out$SNP)
+```
+
+    ## 
+    ## TRUE 
+    ##  247
+
+``` r
+table(dat_disc$OA == dat_out$OA)
+```
+
+    ## 
+    ## TRUE 
+    ##  247
+
+``` r
+table(dat_disc$EA == dat_out$EA)
+```
+
+    ## 
+    ## TRUE 
+    ##  247
+
+``` r
+RegressionCalibration::RC_ivw(b_disc = dat_disc$beta,
+                              b_rep = dat_rep$beta,
+                              b_out = dat_out$beta,
+                              se_disc = dat_disc$se,
+                              se_rep = dat_rep$se,
+                              se_out = dat_out$se)
+```
+
+    ## $b
+    ## [1] 1.0463
+    ## 
+    ## $se
+    ## [1] 0.03410832
+    ## 
+    ## $pval
+    ## [1] 1.197067e-206
+    ## 
+    ## $nsnp
+    ## [1] 247
+
+## Citation
 
 ## Contact
 
