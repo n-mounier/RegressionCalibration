@@ -85,6 +85,8 @@ RC <- function(dat){
 #' \item{pval}{Causal effect p-value}
 #' \item{nsnps}{Number of instruments used}
 #' }
+#' @importFrom rlang .data
+#' @importFrom magrittr "%>%"
 
 RC_ivw <- function(b_disc, b_rep, b_out, se_disc, se_rep, se_out){
   # how many instruments do we need as a minimum?
