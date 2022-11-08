@@ -34,6 +34,9 @@ simple mode implementation in the regression calibration framework
 - **`RC_weighted_mode()`**  
 weigthed mode implementation in the regression calibration framework
 
+More details can be found in the
+[manual](doc/RegressionCalibration-manual.pdf).
+
 ## Installation
 
 You can install the current version of `RegressionCalibration` with:
@@ -120,7 +123,7 @@ resRC = RegressionCalibration::RC(dat)
     ## Outcome:  Body mass index || id:ieu-a-974
 
 ``` r
-resRC
+print(resRC)
 ```
 
     ##                      exposure.discovery            exposure.replication
@@ -131,16 +134,16 @@ resRC
     ## 5 Body mass index (BMI) || id:ukb-a-248 Body mass index || id:ieu-a-974
     ##                           outcome                    method nsnps          pval
     ## 1 Body mass index || id:ieu-a-974 Inverse variance weighted   239 9.385406e-201
-    ## 2 Body mass index || id:ieu-a-974             Simple median   239 3.339987e-111
-    ## 3 Body mass index || id:ieu-a-974           Weighted median   239 5.011951e-130
-    ## 4 Body mass index || id:ieu-a-974               Simple mode   239  1.630656e-08
-    ## 5 Body mass index || id:ieu-a-974             Weighted mode   239  3.514769e-52
-    ##          b         se
-    ## 1 1.045197 0.03457412
-    ## 2 1.046779 0.04671594
-    ## 3 1.053022 0.04340317
-    ## 4 1.086436 0.19238431
-    ## 5 1.055437 0.06943484
+    ## 2 Body mass index || id:ieu-a-974             Simple median   239 3.050065e-119
+    ## 3 Body mass index || id:ieu-a-974           Weighted median   239 3.206253e-150
+    ## 4 Body mass index || id:ieu-a-974               Simple mode   239  5.890611e-09
+    ## 5 Body mass index || id:ieu-a-974             Weighted mode   239  1.015704e-58
+    ##           b         se
+    ## 1 1.0383330 0.03434708
+    ## 2 1.0421470 0.04488679
+    ## 3 1.0374841 0.03974286
+    ## 4 0.7608069 0.13072657
+    ## 5 1.0392550 0.06432274
 
 The output of the `RegressionCalibration::RC` is similar to the one of
 `TwoSampleMR::mr()`.  
@@ -156,33 +159,6 @@ resMR = TwoSampleMR::mr(dat %>% filter(sample == "outcome"))
     ## Analysing 'ukb-a-248' on 'ieu-a-974'
 
 ``` r
-# using full GIANT sample as outcome
-# also possible to use UKB on (full GIANT)
-out <- TwoSampleMR::extract_outcome_data(snps = disc$SNP, outcomes =c('ieu-a-2'))
-```
-
-    ## Extracting data for 315 SNP(s) from 1 GWAS(s)
-
-    ## Finding proxies for 177 SNPs in outcome ieu-a-2
-
-    ## Extracting data for 177 SNP(s) from 1 GWAS(s)
-
-``` r
-dat_fullGIANT <- TwoSampleMR::harmonise_data(disc, out)
-```
-
-    ## Harmonising Body mass index (BMI) || id:ukb-a-248 (ukb-a-248) and Body mass index || id:ieu-a-2 (ieu-a-2)
-
-    ## Removing the following SNPs for being palindromic with intermediate allele frequencies:
-    ## rs11208779, rs1454687, rs1840661, rs2253310, rs7568228, rs815715, rs9489620, rs9536449, rs9835772
-
-``` r
-resMR_fullGIANT = TwoSampleMR::mr(dat_fullGIANT)
-```
-
-    ## Analysing 'ukb-a-248' on 'ieu-a-2'
-
-``` r
 # compare IVW estimates
 resMR %>% filter(method=="Inverse variance weighted")
 ```
@@ -195,17 +171,6 @@ resMR %>% filter(method=="Inverse variance weighted")
     ## 1 0.7873282 0.02604408 9.385406e-201
 
 ``` r
-resMR_fullGIANT %>% filter(method=="Inverse variance weighted")
-```
-
-    ##   id.exposure id.outcome                       outcome
-    ## 1   ukb-a-248    ieu-a-2 Body mass index || id:ieu-a-2
-    ##                                exposure                    method nsnp
-    ## 1 Body mass index (BMI) || id:ukb-a-248 Inverse variance weighted  240
-    ##           b        se          pval
-    ## 1 0.7650597 0.0231447 1.296585e-239
-
-``` r
 resRC %>% filter(method=="Inverse variance weighted")
 ```
 
@@ -214,12 +179,12 @@ resRC %>% filter(method=="Inverse variance weighted")
     ##                           outcome                    method nsnps          pval
     ## 1 Body mass index || id:ieu-a-974 Inverse variance weighted   239 9.385406e-201
     ##          b         se
-    ## 1 1.045197 0.03457412
+    ## 1 1.038333 0.03434708
 
-As the causal effect of BMI on itself is expected to be 1, we can see
-that the standard IVW estimate (regardless of the outcome used) is
-biased towards the null. The IVW using Regression Calibration approach
-recovers the correct value.
+The causal effect of BMI on itself is expected to be 1, but we can see
+that the standard IVW estimate is biased towards the null (0.787,
+SE=0.026). The IVW using Regression Calibration approach recovers the
+correct value (1.038, SE=0.034).
 
 ## Usage - Other Functions
 
@@ -229,21 +194,21 @@ they should be use with care.
 
 ``` r
 dat_disc = dat %>%
-  filter(sample=="replication") %>%
+  filter(sample=="replication", mr_keep) %>%
   transmute(SNP,
             EA = effect_allele.exposure,
             OA = other_allele.exposure,
             beta = beta.exposure,
             se = se.exposure)
 dat_rep = dat %>%
-  filter(sample=="replication") %>%
+  filter(sample=="replication", mr_keep) %>%
   transmute(SNP,
             EA = effect_allele.outcome,
             OA = other_allele.outcome,
             beta = beta.outcome,
             se = se.outcome)
 dat_out = dat %>%
-  filter(sample=="outcome") %>%
+  filter(sample=="outcome", mr_keep) %>%
   transmute(SNP,
             EA = effect_allele.outcome,
             OA = other_allele.outcome,
@@ -255,7 +220,7 @@ table(dat_disc$OA == dat_rep$OA)
 
     ## 
     ## TRUE 
-    ##  247
+    ##  239
 
 ``` r
 table(dat_disc$EA == dat_rep$EA)
@@ -263,7 +228,7 @@ table(dat_disc$EA == dat_rep$EA)
 
     ## 
     ## TRUE 
-    ##  247
+    ##  239
 
 ``` r
 table(dat_disc$SNP == dat_out$SNP)
@@ -271,7 +236,7 @@ table(dat_disc$SNP == dat_out$SNP)
 
     ## 
     ## TRUE 
-    ##  247
+    ##  239
 
 ``` r
 table(dat_disc$OA == dat_out$OA)
@@ -279,7 +244,7 @@ table(dat_disc$OA == dat_out$OA)
 
     ## 
     ## TRUE 
-    ##  247
+    ##  239
 
 ``` r
 table(dat_disc$EA == dat_out$EA)
@@ -287,7 +252,7 @@ table(dat_disc$EA == dat_out$EA)
 
     ## 
     ## TRUE 
-    ##  247
+    ##  239
 
 ``` r
 RegressionCalibration::RC_ivw(b_disc = dat_disc$beta,
@@ -299,16 +264,16 @@ RegressionCalibration::RC_ivw(b_disc = dat_disc$beta,
 ```
 
     ## $b
-    ## [1] 1.0463
+    ## [1] 1.038333
     ## 
     ## $se
-    ## [1] 0.03410832
+    ## [1] 0.03434708
     ## 
     ## $pval
-    ## [1] 1.197067e-206
+    ## [1] 9.385406e-201
     ## 
     ## $nsnp
-    ## [1] 247
+    ## [1] 239
 
 ## Citation
 

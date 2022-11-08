@@ -13,6 +13,9 @@ options(pillar.neg=F, # do no print neg number in red
         pillar.subtle=F, # turn off highlighting of significant digits
         tibble.width = 170) # default=95, increase it to make it readable
 library(tidyverse)
+devtools::build_manual()
+system("mv ../RegressionCalibration_0.0.1.0.pdf ./doc/RegressionCalibration-manual.pdf")
+library(RegressionCalibration)
 
 ```
 
@@ -37,7 +40,9 @@ weigthed median implementation in the regression calibration framework
 -   **`RC_simple_mode()`**  
 simple mode implementation in the regression calibration framework   
 -   **`RC_weighted_mode()`**  
-weigthed mode implementation in the regression calibration framework    
+weigthed mode implementation in the regression calibration framework 
+
+More details can be found in the [manual](doc/RegressionCalibration-manual.pdf).      
 
 ## Installation
 [//]:*******
@@ -90,7 +95,7 @@ The `dat` object now contains all information needed to perform the Regression C
 # columns needed are: 
 # SNP, exposure, outcome, beta.exposure, beta.outcome, se.exposure, se.outcome, mr_keep, sample
 resRC = RegressionCalibration::RC(dat)
-resRC
+print(resRC)
 ``` 
 
 The output of the `RegressionCalibration::RC` is similar to the one of `TwoSampleMR::mr()`.    
@@ -100,19 +105,12 @@ For this example, we can compare the results using the Regression Calibration ap
 # just discovery -> outcome
 resMR = TwoSampleMR::mr(dat %>% filter(sample == "outcome"))
 
-# using full GIANT sample as outcome
-# also possible to use UKB on (full GIANT)
-out <- TwoSampleMR::extract_outcome_data(snps = disc$SNP, outcomes =c('ieu-a-2'))
-dat_fullGIANT <- TwoSampleMR::harmonise_data(disc, out)
-resMR_fullGIANT = TwoSampleMR::mr(dat_fullGIANT)
-
 # compare IVW estimates
 resMR %>% filter(method=="Inverse variance weighted")
-resMR_fullGIANT %>% filter(method=="Inverse variance weighted")
 resRC %>% filter(method=="Inverse variance weighted")
 ``` 
 
-As the causal effect of BMI on itself is expected to be 1, we can see that the standard IVW estimate (regardless of the outcome used) is biased towards the null. The IVW using Regression Calibration approach recovers the correct value.
+The causal effect of BMI on itself is expected to be 1, but we can see that the standard IVW estimate is biased towards the null (`r  resMR %>% filter(method=="Inverse variance weighted") %>% pull(b) %>% round(3)`, SE=`r resMR %>% filter(method=="Inverse variance weighted") %>% pull(se) %>% round(3)`). The IVW using Regression Calibration approach recovers the correct value (`r resRC %>% filter(method=="Inverse variance weighted") %>% pull(b) %>% round(3)`, SE=`r resRC %>% filter(method=="Inverse variance weighted") %>% pull(se) %>% round(3)`).
 
 ## Usage - Other Functions
 
@@ -120,21 +118,21 @@ Other functions (method-specific) are also available. As they require a differen
 
 ```{r otherFunctions, eval=T}
 dat_disc = dat %>%
-  filter(sample=="replication") %>%
+  filter(sample=="replication", mr_keep) %>%
   transmute(SNP,
             EA = effect_allele.exposure,
             OA = other_allele.exposure,
             beta = beta.exposure,
             se = se.exposure)
 dat_rep = dat %>%
-  filter(sample=="replication") %>%
+  filter(sample=="replication", mr_keep) %>%
   transmute(SNP,
             EA = effect_allele.outcome,
             OA = other_allele.outcome,
             beta = beta.outcome,
             se = se.outcome)
 dat_out = dat %>%
-  filter(sample=="outcome") %>%
+  filter(sample=="outcome", mr_keep) %>%
   transmute(SNP,
             EA = effect_allele.outcome,
             OA = other_allele.outcome,
