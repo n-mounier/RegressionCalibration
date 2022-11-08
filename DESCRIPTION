@@ -2,11 +2,13 @@ Package: RegressionCalibration
 Type: Package
 Title: an R-package to perform three-sample Mendelian Randomisation (MR) analyses using the Regression Calibration framework
 Version: 0.1.0
+Description: to be added... to be added... to be added...
 Author:   person(given = "Ninon",
            family = "Mounier",
            role = c("aut", "cre"),
            email = "first.last@example.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
+Maintainer: Ninon Mounier <ninon.mounier@gmail.com>
 License: GPL-2 | file LICENSE
 Encoding: UTF-8
 LazyData: true

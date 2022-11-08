@@ -2,7 +2,7 @@
 % Please edit documentation in R/mr_all.R
 \name{RC}
 \alias{RC}
-\title{Perform Regression Calibration for all estimators(IVW, simple/weighted median, simple/weighted mode)}
+\title{Perform Regression Calibration for all estimators (IVW, simple/weighted median, simple/weighted mode)}
 \usage{
 RC(dat)
 }
@@ -22,5 +22,5 @@ For each method (IVW, simple/weighted median, simple/weighted mode)
 }
 }
 \description{
-Perform Regression Calibration for all estimators(IVW, simple/weighted median, simple/weighted mode)
+Perform Regression Calibration for all estimators (IVW, simple/weighted median, simple/weighted mode)
 }

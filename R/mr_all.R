@@ -28,9 +28,9 @@ RC <- function(dat){
 
   # disc - rep
   dat %>%
-    filter(.data$sample=="replication",
+    dplyr::filter(.data$sample=="replication",
            .data$mr_keep) %>%
-    transmute(.data$SNP,
+    dplyr::transmute(.data$SNP,
               b_disc = .data$beta.exposure,
               b_rep = .data$beta.outcome,
               se_disc = .data$se.exposure,
@@ -38,13 +38,13 @@ RC <- function(dat){
 
   # disc - out
   dat %>%
-    filter(.data$sample=="outcome",
+    dplyr::filter(.data$sample=="outcome",
            .data$mr_keep)  %>%
-    transmute(.data$SNP,
+    dplyr::transmute(.data$SNP,
               b_out = .data$beta.outcome,
               se_out = .data$se.outcome) -> dat_out
 
-  dat_clean = inner_join(dat_exp, dat_out, by="SNP") %>% mutate(SNP=NULL)
+  dat_clean = dplyr::inner_join(dat_exp, dat_out, by="SNP") %>% dplyr::mutate(SNP=NULL)
 
   res = data.frame(exposure.discovery = disc,
                    exposure.replication = out,
@@ -62,8 +62,8 @@ RC <- function(dat){
   res[5, 5:8] = unlist(with(dat_clean, RegressionCalibration::RC_weighted_mode(b_disc, b_rep, b_out, se_disc, se_rep, se_out)))
 
   res %>%
-    relocate(.data$nsnps, .after=.data$method) %>%
-    relocate(.data$pval, .after=.data$nsnps)-> res
+    dplyr::relocate(.data$nsnps, .after=.data$method) %>%
+    dplyr::relocate(.data$pval, .after=.data$nsnps)-> res
 
   return(res)
 }
@@ -98,7 +98,7 @@ RC_ivw <- function(b_disc, b_rep, b_out, se_disc, se_rep, se_out){
 
   b <- IVW_model$b/IVW_C
   se <- sqrt(IVW_model$se**2 / IVW_C**2)
-  pval <- 2 * pnorm(abs(b/se), lower.tail=FALSE)
+  pval <- 2 * stats::pnorm(abs(b/se), lower.tail=FALSE)
 
   return(list(b = b, se = se, pval = pval, nsnp=length(b_disc)))
 
@@ -134,7 +134,7 @@ RC_simple_median <- function(b_disc, b_rep, b_out, se_disc, se_rep, se_out){
 
   b <- MedianBased_model$b/MedianBased_C
   se <- sqrt(MedianBased_model$se**2 / MedianBased_C**2)
-  pval <- 2 * pnorm(abs(b/se), lower.tail=FALSE)
+  pval <- 2 * stats::pnorm(abs(b/se), lower.tail=FALSE)
 
   return(list(b = b, se = se, pval = pval, nsnp=length(b_disc)))
 }
@@ -169,7 +169,7 @@ RC_weighted_median <- function(b_disc, b_rep, b_out, se_disc, se_rep, se_out){
 
   b <- MedianBased_model$b/MedianBased_C
   se <- sqrt(MedianBased_model$se**2 / MedianBased_C**2)
-  pval <- 2 * pnorm(abs(b/se), lower.tail=FALSE)
+  pval <- 2 * stats::pnorm(abs(b/se), lower.tail=FALSE)
 
   return(list(b = b, se = se, pval = pval, nsnp=length(b_disc)))
 }
@@ -206,7 +206,7 @@ RC_simple_mode <- function(b_disc, b_rep, b_out, se_disc, se_rep, se_out){
 
   b <- ModeBased_model$b/ModeBased_C
   se <- sqrt(ModeBased_model$se**2 / ModeBased_C**2)
-  pval <- 2 * pnorm(abs(b/se), lower.tail=FALSE)
+  pval <- 2 * stats::pnorm(abs(b/se), lower.tail=FALSE)
 
   return(list(b = b, se = se, pval = pval, nsnp=length(b_disc)))
 }
@@ -244,7 +244,7 @@ RC_weighted_mode <- function(b_disc, b_rep, b_out, se_disc, se_rep, se_out){
 
   b <- ModeBased_model$b/ModeBased_C
   se <- sqrt(ModeBased_model$se**2 / ModeBased_C**2)
-  pval <- 2 * pnorm(abs(b/se), lower.tail=FALSE)
+  pval <- 2 * stats::pnorm(abs(b/se), lower.tail=FALSE)
 
   return(list(b = b, se = se, pval = pval, nsnp=length(b_disc)))
 }
