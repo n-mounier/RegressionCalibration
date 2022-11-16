@@ -17,6 +17,8 @@ Imports:
     dplyr,
     rlang,
     TwoSampleMR,
+    mr.raps,
+    truncnorm
 Remotes: 
   MRCIEU/TwoSampleMR,
 RoxygenNote: 7.2.1

@@ -14,7 +14,7 @@ options(pillar.neg=F, # do no print neg number in red
         tibble.width = 170) # default=95, increase it to make it readable
 library(tidyverse)
 devtools::build_manual()
-system("mv ../RegressionCalibration_0.0.1.0.pdf ./doc/RegressionCalibration-manual.pdf")
+file.copy("../RegressionCalibration_0.1.0.pdf", "./doc/RegressionCalibration-manual.pdf")
 library(RegressionCalibration)
 
 ```
@@ -40,7 +40,11 @@ weigthed median implementation in the regression calibration framework
 -   **`RC_simple_mode()`**  
 simple mode implementation in the regression calibration framework   
 -   **`RC_weighted_mode()`**  
-weigthed mode implementation in the regression calibration framework 
+weigthed mode implementation in the regression calibration framework    
+
+We also implemented the MR-RAPS using ZP and MR-RAPS using UMVCUE approaches:    
+-   **`raps_ZP()`**  
+-   **`raps_UMVCUE`()`**  
 
 More details can be found in the [manual](doc/RegressionCalibration-manual.pdf).      
 
@@ -151,6 +155,26 @@ RegressionCalibration::RC_ivw(b_disc = dat_disc$beta,
                               se_disc = dat_disc$se,
                               se_rep = dat_rep$se,
                               se_out = dat_out$se)
+
+# MR-RAPS using ZP correction (as presented in the paper) 
+# just discovery -> outcome
+RegressionCalibration::raps_ZP(b_exp = dat_disc$beta,
+                               b_out = dat_out$beta,
+                               se_exp = dat_disc$se,
+                               se_out = dat_out$se,
+                               threshold = 5e-8)
+# less biased than standard IVW, but still not recovering true causal effect
+
+# MR-RAPS using UMVCUE correction (as presented in the paper)
+RegressionCalibration::raps_UMVCUE(b_disc = dat_disc$beta,
+                               b_rep = dat_rep$beta,
+                               b_out = dat_out$beta,
+                               se_disc = dat_disc$se,
+                               se_rep = dat_rep$se,
+                               se_out = dat_out$se,
+                               threshold = 5e-8)
+# less biased than standard IVW, but still not recovering true causal effect
+
 ``` 
 
 ## Citation

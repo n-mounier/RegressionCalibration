@@ -34,6 +34,11 @@ simple mode implementation in the regression calibration framework
 - **`RC_weighted_mode()`**  
 weigthed mode implementation in the regression calibration framework
 
+We also implemented the MR-RAPS using ZP and MR-RAPS using UMVCUE
+approaches:  
+- **`raps_ZP()`**  
+- **`raps_UMVCUE`()\`**
+
 More details can be found in the
 [manual](doc/RegressionCalibration-manual.pdf).
 
@@ -133,17 +138,17 @@ print(resRC)
     ## 4 Body mass index (BMI) || id:ukb-a-248 Body mass index || id:ieu-a-974
     ## 5 Body mass index (BMI) || id:ukb-a-248 Body mass index || id:ieu-a-974
     ##                           outcome                    method nsnps          pval
-    ## 1 Body mass index || id:ieu-a-974 Inverse variance weighted   239 9.385406e-201
-    ## 2 Body mass index || id:ieu-a-974             Simple median   239 3.050065e-119
-    ## 3 Body mass index || id:ieu-a-974           Weighted median   239 3.206253e-150
-    ## 4 Body mass index || id:ieu-a-974               Simple mode   239  5.890611e-09
-    ## 5 Body mass index || id:ieu-a-974             Weighted mode   239  1.015704e-58
-    ##           b         se
-    ## 1 1.0383330 0.03434708
-    ## 2 1.0421470 0.04488679
-    ## 3 1.0374841 0.03974286
-    ## 4 0.7608069 0.13072657
-    ## 5 1.0392550 0.06432274
+    ## 1 Body mass index || id:ieu-a-974 Inverse variance weighted   239 1.030811e-201
+    ## 2 Body mass index || id:ieu-a-974             Simple median   239 2.900586e-118
+    ## 3 Body mass index || id:ieu-a-974           Weighted median   239 3.552094e-143
+    ## 4 Body mass index || id:ieu-a-974               Simple mode   239  7.723457e-09
+    ## 5 Body mass index || id:ieu-a-974             Weighted mode   239  1.603317e-57
+    ##          b         se
+    ## 1 1.047358 0.03456228
+    ## 2 1.080210 0.04672150
+    ## 3 1.074307 0.04216783
+    ## 4 1.089359 0.18865373
+    ## 5 1.053989 0.06593255
 
 The output of the `RegressionCalibration::RC` is similar to the one of
 `TwoSampleMR::mr()`.  
@@ -168,7 +173,7 @@ resMR %>% filter(method=="Inverse variance weighted")
     ##                                exposure                    method nsnp
     ## 1 Body mass index (BMI) || id:ukb-a-248 Inverse variance weighted  239
     ##           b         se          pval
-    ## 1 0.7873282 0.02604408 9.385406e-201
+    ## 1 0.7889564 0.02603515 1.030811e-201
 
 ``` r
 resRC %>% filter(method=="Inverse variance weighted")
@@ -177,14 +182,14 @@ resRC %>% filter(method=="Inverse variance weighted")
     ##                      exposure.discovery            exposure.replication
     ## 1 Body mass index (BMI) || id:ukb-a-248 Body mass index || id:ieu-a-974
     ##                           outcome                    method nsnps          pval
-    ## 1 Body mass index || id:ieu-a-974 Inverse variance weighted   239 9.385406e-201
+    ## 1 Body mass index || id:ieu-a-974 Inverse variance weighted   239 1.030811e-201
     ##          b         se
-    ## 1 1.038333 0.03434708
+    ## 1 1.047358 0.03456228
 
 The causal effect of BMI on itself is expected to be 1, but we can see
-that the standard IVW estimate is biased towards the null (0.787,
+that the standard IVW estimate is biased towards the null (0.789,
 SE=0.026). The IVW using Regression Calibration approach recovers the
-correct value (1.038, SE=0.034).
+correct value (1.047, SE=0.035).
 
 ## Usage - Other Functions
 
@@ -264,16 +269,67 @@ RegressionCalibration::RC_ivw(b_disc = dat_disc$beta,
 ```
 
     ## $b
-    ## [1] 1.038333
+    ## [1] 1.047358
     ## 
     ## $se
-    ## [1] 0.03434708
+    ## [1] 0.03456228
     ## 
     ## $pval
-    ## [1] 9.385406e-201
+    ## [1] 1.030811e-201
     ## 
     ## $nsnp
     ## [1] 239
+
+``` r
+# MR-RAPS using ZP correction (as presented in the paper) 
+# just discovery -> outcome
+RegressionCalibration::raps_ZP(b_exp = dat_disc$beta,
+                               b_out = dat_out$beta,
+                               se_exp = dat_disc$se,
+                               se_out = dat_out$se,
+                               threshold = 5e-8)
+```
+
+    ## $b
+    ## [1] 0.8659352
+    ## 
+    ## $se
+    ## [1] 0.02807875
+    ## 
+    ## $pval
+    ## [1] 7.743111e-209
+    ## 
+    ## $nsnp
+    ## [1] 239
+
+``` r
+# less biased than standard IVW, but still not recovering true causal effect
+
+# MR-RAPS using UMVCUE correction (as presented in the paper)
+RegressionCalibration::raps_UMVCUE(b_disc = dat_disc$beta,
+                               b_rep = dat_rep$beta,
+                               b_out = dat_out$beta,
+                               se_disc = dat_disc$se,
+                               se_rep = dat_rep$se,
+                               se_out = dat_out$se,
+                               threshold = 5e-8)
+```
+
+    ## $b
+    ## [1] 0.929773
+    ## 
+    ## $se
+    ## [1] 0.02302889
+    ## 
+    ## $pval
+    ## [1] 0
+    ## 
+    ## $nsnp
+    ## [1] 239
+
+``` r
+# less biased than standard IVW, but still not recovering true causal effect
+```
 
 ## Citation
 
