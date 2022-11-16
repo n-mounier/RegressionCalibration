@@ -139,16 +139,16 @@ print(resRC)
     ## 5 Body mass index (BMI) || id:ukb-a-248 Body mass index || id:ieu-a-974
     ##                           outcome                    method nsnps          pval
     ## 1 Body mass index || id:ieu-a-974 Inverse variance weighted   239 1.030811e-201
-    ## 2 Body mass index || id:ieu-a-974             Simple median   239 2.900586e-118
-    ## 3 Body mass index || id:ieu-a-974           Weighted median   239 3.552094e-143
-    ## 4 Body mass index || id:ieu-a-974               Simple mode   239  7.723457e-09
-    ## 5 Body mass index || id:ieu-a-974             Weighted mode   239  1.603317e-57
+    ## 2 Body mass index || id:ieu-a-974             Simple median   239 7.139222e-124
+    ## 3 Body mass index || id:ieu-a-974           Weighted median   239 9.855391e-144
+    ## 4 Body mass index || id:ieu-a-974               Simple mode   239  7.198955e-09
+    ## 5 Body mass index || id:ieu-a-974             Weighted mode   239  4.319243e-55
     ##          b         se
     ## 1 1.047358 0.03456228
-    ## 2 1.080210 0.04672150
-    ## 3 1.074307 0.04216783
-    ## 4 1.089359 0.18865373
-    ## 5 1.053989 0.06593255
+    ## 2 1.080210 0.04563392
+    ## 3 1.074307 0.04208491
+    ## 4 1.089359 0.18826800
+    ## 5 1.053989 0.06741951
 
 The output of the `RegressionCalibration::RC` is similar to the one of
 `TwoSampleMR::mr()`.  
@@ -316,10 +316,10 @@ RegressionCalibration::raps_UMVCUE(b_disc = dat_disc$beta,
 ```
 
     ## $b
-    ## [1] 0.929773
+    ## [1] 0.9303083
     ## 
     ## $se
-    ## [1] 0.02302889
+    ## [1] 0.02292145
     ## 
     ## $pval
     ## [1] 0
