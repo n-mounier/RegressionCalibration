@@ -18,7 +18,9 @@ Imports:
     rlang,
     TwoSampleMR,
     mr.raps,
-    truncnorm
+    truncnorm,
+    gwas.winners.curse
 Remotes: 
   MRCIEU/TwoSampleMR,
+  cpalmer718/gwas-winners-curse
 RoxygenNote: 7.2.1

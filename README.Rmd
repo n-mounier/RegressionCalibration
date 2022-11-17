@@ -158,14 +158,15 @@ RegressionCalibration::RC_ivw(b_disc = dat_disc$beta,
 
 # MR-RAPS using ZP correction (as presented in the paper) 
 # just discovery -> outcome
+# less biased than standard IVW, but still not recovering true causal effect
 RegressionCalibration::raps_ZP(b_exp = dat_disc$beta,
                                b_out = dat_out$beta,
                                se_exp = dat_disc$se,
                                se_out = dat_out$se,
                                threshold = 5e-8)
-# less biased than standard IVW, but still not recovering true causal effect
 
 # MR-RAPS using UMVCUE correction (as presented in the paper)
+# less biased than standard IVW, but still not recovering true causal effect
 RegressionCalibration::raps_UMVCUE(b_disc = dat_disc$beta,
                                b_rep = dat_rep$beta,
                                b_out = dat_out$beta,
@@ -173,7 +174,6 @@ RegressionCalibration::raps_UMVCUE(b_disc = dat_disc$beta,
                                se_rep = dat_rep$se,
                                se_out = dat_out$se,
                                threshold = 5e-8)
-# less biased than standard IVW, but still not recovering true causal effect
 
 ``` 
 
