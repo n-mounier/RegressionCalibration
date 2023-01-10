@@ -46,7 +46,11 @@ We also implemented the MR-RAPS using ZP and MR-RAPS using UMVCUE approaches:
 -   **`raps_ZP()`**  
 -   **`raps_UMVCUE`()`**  
 
-More details can be found in the [manual](doc/RegressionCalibration-manual.pdf).      
+More details can be found in the [manual](doc/RegressionCalibration-manual.pdf).     
+
+Note that scripts to reproduce simulation results from our paper are available here:   
+[launch_simulations.R](inst/Scripts/launch_simulations.R)   
+[make_figures_simulations.R](inst/Scripts/launch_simulations.R)    
 
 ## Installation
 [//]:*******
